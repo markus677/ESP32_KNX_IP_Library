@@ -200,12 +200,12 @@ void ESPKNXIP::restore_from_eeprom()
 
 #else
 
-void ESPKNXIP::start()
+uint8_t ESPKNXIP::start()
 {
   #ifdef ESP32
-    udp.beginMulticast(MULTICAST_IP, MULTICAST_PORT);
+    return udp.beginMulticast(MULTICAST_IP, MULTICAST_PORT);
   #else
-    udp.beginMulticast(WiFi.localIP(),  MULTICAST_IP, MULTICAST_PORT);
+    return udp.beginMulticast(WiFi.localIP(),  MULTICAST_IP, MULTICAST_PORT);
   #endif
 }
 

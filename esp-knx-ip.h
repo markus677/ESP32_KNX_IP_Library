@@ -374,7 +374,7 @@ typedef struct __callback_assignment
 class ESPKNXIP {
   public:
     ESPKNXIP();
-    void start();
+    uint8_t start();
     void loop();
 
     #ifdef ESP_KNX_WEBSERVER
