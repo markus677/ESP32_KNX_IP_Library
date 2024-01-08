@@ -40,7 +40,7 @@
 #endif
 #define SEND_CHECKSUM             0
 
-// #define ESP_KNX_WEBSERVER
+#undef ESP_KNX_WEBSERVER            // leave out WebServer and related code to allow for integation into ESPHOME
 
 // Uncomment to enable printing out debug messages.
 #define ESP_KNX_DEBUG
