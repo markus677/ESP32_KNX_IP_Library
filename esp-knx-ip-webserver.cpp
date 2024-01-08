@@ -4,6 +4,8 @@
  * License: MIT
  */
 
+#ifdef ESP_KNX_WEBSERVER
+
 #include "esp-knx-ip.h"
 
 void ESPKNXIP::__handle_root()
@@ -525,3 +527,6 @@ end:
   server->send(302);
 }
 #endif
+
+#endif
+

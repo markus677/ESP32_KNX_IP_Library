@@ -6,8 +6,12 @@
 
 #include "esp-knx-ip.h"
 
-ESPKNXIP::ESPKNXIP() : server(nullptr), registered_callback_assignments(0), registered_callbacks(0), registered_configs(0), registered_feedbacks(0)
+ESPKNXIP::ESPKNXIP(): registered_callback_assignments(0), registered_callbacks(0), registered_configs(0), registered_feedbacks(0)
 {
+  #ifdef ESP_KNX_WEBSERVER
+    this.server = nullptr;
+  #endif
+
   DEBUG_PRINTLN();
   DEBUG_PRINTLN("ESPKNXIP starting up");
   // Default physical address is 1.1.0
@@ -20,12 +24,15 @@ ESPKNXIP::ESPKNXIP() : server(nullptr), registered_callback_assignments(0), regi
   memset(custom_configs, 0, MAX_CONFIGS * sizeof(config_t));
 }
 
+#ifdef ESP_KNX_WEBSERVER
+
 void ESPKNXIP::load()
 {
   memcpy(custom_config_default_data, custom_config_data, MAX_CONFIG_SPACE);
   EEPROM.begin(EEPROM_SIZE);
   restore_from_eeprom();
 }
+
 
 #ifdef ESP32
 void ESPKNXIP::start(WebServer *srv)
@@ -191,6 +198,19 @@ void ESPKNXIP::restore_from_eeprom()
   DEBUG_PRINTLN(address, HEX);
 }
 
+#else
+
+void ESPKNXIP::start()
+{
+  #ifdef ESP32
+    udp.beginMulticast(MULTICAST_IP, MULTICAST_PORT);
+  #else
+    udp.beginMulticast(WiFi.localIP(),  MULTICAST_IP, MULTICAST_PORT);
+  #endif
+}
+
+#endif 
+
 uint16_t ESPKNXIP::__ntohs(uint16_t n)
 {
   return (uint16_t)((((uint8_t*)&n)[0] << 8) | (((uint8_t*)&n)[1]));
@@ -346,21 +366,25 @@ feedback_id_t ESPKNXIP::feedback_register_action(String name, feedback_action_fp
   return id;
 }
 
-void ESPKNXIP::loop()
-{
-  __loop_knx();
-  if (server != nullptr)
-  {
-    __loop_webserver();
-  }
-}
+#ifdef ESP_KNX_WEBSERVER
+    void ESPKNXIP::loop()
+    {
+      __loop_knx();
+      if (server != nullptr)
+      {
+        __loop_webserver();
+      }
+    }
 
-void ESPKNXIP::__loop_webserver()
-{
-  server->handleClient();
-}
+    void ESPKNXIP::__loop_webserver()
+    {
+      server->handleClient();
+    }
 
-void ESPKNXIP::__loop_knx()
+    void ESPKNXIP::__loop_knx()
+#else
+    void ESPKNXIP::loop()
+#endif
 {
   int read = udp.parsePacket();
   if (!read)

@@ -40,6 +40,8 @@
 #endif
 #define SEND_CHECKSUM             0
 
+// #define ESP_KNX_WEBSERVER
+
 // Uncomment to enable printing out debug messages.
 #define ESP_KNX_DEBUG
 /**
@@ -50,15 +52,20 @@
 
 #ifdef ESP32
     #include <WiFi.h>
-    #include <WebServer.h>
+    #ifdef ESP_KNX_WEBSERVER
+        #include <WebServer.h>
+    #endif
 #else
     #include <ESP8266WiFi.h>
-    #include <ESP8266WebServer.h>
+    #ifdef ESP_KNX_WEBSERVER
+        #include <ESP8266WebServer.h>
+    #endif
 #endif
 
-#include <EEPROM.h>
-#include <WiFiUdp.h>
-
+#ifdef ESP_KNX_WEBSERVER
+    #include <EEPROM.h>
+    #include <WiFiUdp.h>
+#endif
 
 #include "DPT.h"
 
@@ -368,17 +375,21 @@ typedef struct __callback_assignment
 class ESPKNXIP {
   public:
     ESPKNXIP();
-    void load();
     void start();
-    #ifdef ESP32
-        void start(WebServer *srv);
-    #else
-        void start(ESP8266WebServer *srv);
-    #endif
     void loop();
 
-    void save_to_eeprom();
-    void restore_from_eeprom();
+    #ifdef ESP_KNX_WEBSERVER
+        void load();
+
+        #ifdef ESP32
+            void start(WebServer *srv);
+        #else
+            void start(ESP8266WebServer *srv);
+        #endif
+
+        void save_to_eeprom();
+        void restore_from_eeprom();
+    #endif
 
     callback_id_t callback_register(String name, callback_fptr_t cb, void *arg = nullptr, enable_condition_t cond = nullptr);
     void          callback_assign(callback_id_t id, address_t val);
@@ -530,13 +541,15 @@ class ESPKNXIP {
 
     callback_assignment_id_t __callback_register_assignment(address_t address, callback_id_t id);
     void __callback_delete_assignment(callback_assignment_id_t id);
-    
-    #ifdef ESP32
-        WebServer *server;
-    #else
-        ESP8266WebServer *server;
-    #endif
 
+    #ifdef ESP_KNX_WEBSERVER    
+        #ifdef ESP32
+            WebServer *server;
+        #else
+            ESP8266WebServer *server;
+        #endif
+    #endif
+    
     address_t physaddr;
     WiFiUDP udp;
 
