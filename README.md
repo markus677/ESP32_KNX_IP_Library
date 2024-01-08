@@ -1,3 +1,15 @@
+This is a fork of https://github.com/jamel-86/ESP32_KNX_IP_Library with modifications to allow for integration into ESPHOME.
+
+Changes:
+- excluded WebServer related code (see #define ESP_KNX_WEBSERVER)
+
+Use in ESPHOME yaml:
+
+	esphome:
+		libraries:
+			- WiFi
+			- https://github.com/markus677/ESP32_KNX_IP_Library
+
 # ESP32-KNX-IP
 
 This is a ported fork of the original ESP8266 by @envy, all kudos to him
